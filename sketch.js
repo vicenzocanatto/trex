@@ -16,7 +16,7 @@ function preload(){
   cloudImage = loadImage("cloud.png");
 
   gameoverImage = loadImage("gameOver.png");
-  restartImage = loadImage("restart.png");
+  restartImage = loadImage("gameOver.png");
 
   puloSom = loadSound("jump.mp3");
   morteSom = loadSound("die.mp3");
@@ -32,28 +32,28 @@ function preload(){
 }
 
 function setup() {
-  createCanvas(600, 200);
+  createCanvas(windowWidth,windowHeight);
 
-  trex = createSprite(50,160,20,50);
+  trex = createSprite(50, height - 40, 20, 50);
   trex.addAnimation("running", trex_running);
   trex.addAnimation("collided",trex_collided);
   trex.scale = 0.5;
 
-  gameover = createSprite(300, 100);
+  gameover = createSprite(width / 2, height / 2);
   gameover.addImage("gameOver", gameoverImage);
   gameover.scale = 0.7;
-  restart = createSprite(400, 140);
+  restart = createSprite(width /  + 100, height + 40);
   restart.addImage("restart", restartImage);
   restart.scale = 0.4;
 
   gameover.visible = false;
-  restart.visible = false;
+  restart.visible = true;
 
-  ground = createSprite(200,180,400,20);
-  ground.addImage("ground",groundImage);
-  ground.x = ground.width /2;
+  ground = createSprite(width - 300, height - 20, width, 20);
+  ground.addImage("ground", groundImage);
+  ground.x = ground.width / 2;
   
-  invisibleGround = createSprite(200,190,400,10);
+  invisibleGround = createSprite(width / 2, height - 10 , width, 10);
   invisibleGround.visible = false;
   
   console.log("Hello"+ 5)
@@ -61,9 +61,9 @@ function setup() {
   cactogrupo = new Group();
   nuvemgrupo = new Group();
 
-  trex.debug = true;
-  // trex.setCollider("circle",0,0,40);
-  trex.setCollider("rectangle",40,0,220,55,0);
+  trex.debug = false;
+  trex.setCollider("circle",0,0,40);
+  // trex.setCollider("rectangle",40,0,220,55,0);
 }
 
 function draw() {
@@ -74,13 +74,14 @@ function draw() {
   }
 
   trex.collide(invisibleGround);
-  text("Pontuação: " + pontuacao,500,40);
+  text("Pontuação: " + pontuacao, width - 100, 40);
 
  if(estado === "Comeco") {
    pontuacao = pontuacao + Math.round(getFrameRate() / 60);
-  if(keyDown("space") && trex.y >= 100) {
+  if(touches.length > 0 || keyDown("space") && trex.y >= height - 80) {
     puloSom.play();
-    trex.velocityY = -10;
+    trex.velocityY = -15;
+    touches = [];
   }
   if(ground.x < 0){
     ground.x = ground.width / 2;
@@ -90,9 +91,9 @@ function draw() {
     spawnClouds();
     cactose();
   if(trex.isTouching(cactogrupo)) {
-    // estado = "Fim";
+    estado = "Fim";
     morteSom.play();
-    trex.velocityY = -0.1;
+    // trex.velocityY = -0.1;
   }
 }
 
@@ -106,10 +107,13 @@ function draw() {
    nuvemgrupo.setLifetimeEach(-1);
    restart.visible = true;
    gameover.visible = true;
-
-   if(mousePressedOver(restart)){
+   
+   if(touches.length > 0 || mousePressedOver(restart)){
     reset();
+    console.log("restart");
+    touches = [];
   }
+
   }
   drawSprites();
 }
@@ -117,18 +121,18 @@ function draw() {
 function spawnClouds() {
   //escreva o código aqui para gerar as nuvens
   if (frameCount % 60 === 0) {
-    cloud = createSprite(600,100,40,10);
+    cloud = createSprite(width, 100,40,10);
     cloud.addImage(cloudImage)
-    cloud.y = Math.round(random(10,60))
+    cloud.y = Math.round(random(10,height / 2))
     cloud.scale = 0.4;
     cloud.velocityX = -3;
     
     
     //atribua tempo de vida à variável
-    cloud.lifetime = 245
+    cloud.lifetime = 600;
     
     //ajuste a profundidade
-    cloud.depth = trex.depth
+    cloud.depth = trex.depth;
     trex.depth = trex.depth + 1;
     nuvemgrupo.add(cloud);
     }
@@ -136,11 +140,11 @@ function spawnClouds() {
 
 function cactose(){
     if(frameCount % 80 === 0){
-     cacto = createSprite(600,170,40,10);
+     cacto = createSprite(width, height-35,26,10);
      sc = Math.round(random(1,6))
      cacto.scale = 0.6;
      cacto.velocityX = -(3 + pontuacao / 100);
-     cacto.lifetime = 240;
+     cacto.lifetime = 600;
 
     cactogrupo.add(cacto);
 
@@ -172,4 +176,5 @@ function reset() {
   gameover.visible = false;
   restart.visible = false;
 }
+
 
